@@ -1,0 +1,168 @@
+---
+title: "R Dataframes"
+output: html_notebook
+---
+
+# Lab \| Exploring the `sample_superstore` Dataset
+
+In this lab, you will work with the `sample_superstore` dataset to practice creating, inspecting, and manipulating dataframes. Follow the steps below to complete the tasks.
+
+## Step 1: Importing the Dataset
+
+-   Load the `sample_superstore` dataset into a dataframe. You can find this dataset in the `datasets` package or download it as a CSV file from online sources.
+
+-   Save the dataframe as `superstore`.
+
+    **Hint:** Use the `read.csv()` or `read_excel()` function to import the dataset.
+```{r}
+df <- read.csv("dataset/Sample - Superstore.csv")
+head(df)
+```
+    
+
+## Step 2: Inspecting the Dataframe
+
+-   Display the first 10 rows of the dataframe using the `head()` function.
+```{r}
+head(df, 10)
+```
+
+-   Use the `str()` function to inspect the structure of the dataframe. What are the data types of the columns?
+```{r}
+str(df)
+```
+
+-   Use the `summary()` function to get a summary of the dataframe. What insights can you gather from the summary?
+```{r}
+summary(df)
+```
+
+## Step 3: Accessing Data
+
+-   Extract the `Sales` column as a vector using the `$` operator.
+```{r}
+df$Sales
+```
+
+-   Subset the first 15 rows and the columns `Order ID`, `Customer Name`, and `Sales`.
+```{r}
+df_subset <- df[1:15, c("Order.ID", "Customer.Name", "Sales")]
+print(df_subset)
+```
+
+
+-   Use the `nrow()` and `ncol()` functions to determine the number of rows and columns in the dataframe.
+```{r}
+nrow(df)
+ncol(df)
+```
+
+## Step 4: Filtering Data
+
+-   Filter the dataframe to show only rows where the `Profit` is greater than 100.
+```{r}
+library(dplyr)
+filtered_profit <- df %>% filter(Profit > 100)
+print(filtered_profit)
+```
+```{r}
+df[df$Profit > 100,]
+```
+
+-   Filter the dataframe to show only rows where the `Category` is `"Furniture"` and the `Sales` are greater than 500.
+```{r}
+filtered_furntiture_sales <- df %>% filter(Category == "Furniture" & Sales > 500)
+print(filtered_furntiture_sales)
+```
+```{r}
+df[df$Category == "Furniture" & df$Sales > 500, ]
+```
+
+-   Filter the dataframe to show only rows where the `Region` is `"West"` and the `Quantity` is greater than 5.
+```{r}
+filtered_west_quantity <- df %>% filter(Region == "West" & Quantity > 5)
+print(filtered_west_quantity)
+```
+```{r}
+df[df$Region == "West" & df$Quantity > 5, ]
+```
+
+
+## Step 5: Adding and Modifying Columns
+
+-   Add a new column called `Profit Margin` that calculates the profit margin as `(Profit / Sales) * 100`.
+```{r}
+df <- transform(df, 
+                'Profit.Margin' = (Profit/Sales) * 100
+                )
+head(df)
+```
+
+-   Modify the `Sales` column by rounding the values to 2 decimal places.
+```{r}
+df$Sales <- round(df$Sales, 2)
+head(df)
+```
+
+-   Remove the `Postal Code` column from the dataframe using the `subset()` or `select()` function.
+
+```{r}
+df <- select(df, -Postal.Code)
+
+```
+```{r}
+head(df)
+```
+
+## Step 6: Handling Missing Data
+
+-   Check for missing values in the dataframe using the `is.na()` function. Are there any missing values?
+```{r}
+sum(is.na(df))
+```
+-   If there are missing values, remove rows with missing data using the `na.omit()` function.
+```{r}
+df <- na.omit(df)
+```
+-   Replace any missing values in the `Sales` column with the mean of the `Sales` column using the `na.fill()` function.
+```{r}
+library(zoo)
+df$Sales <- na.fill(df$Sales, fill = mean(df$Sales))
+```
+
+
+## Step 7: Advanced Analysis (Optional)
+
+-   Group the dataframe by `Region` and calculate the total `Sales` and `Profit` for each region.
+```{r}
+df_grouped <- df %>% 
+  group_by(Region) %>%
+  summarise(
+    Total.Sales=sum(Sales),
+    Total.Profit=sum(Profit)
+  )
+print(df_grouped)
+```
+
+-   Create a new column called `Discount Level` that categorizes the `Discount` column into:
+    -   `"Low"` (0-0.2)
+    -   `"Medium"` (0.2-0.5)
+    -   `"High"` (0.5-1)
+```{r}
+df <- transform (df,
+                 Discount.Level= case_when(
+                   Discount >=0 & Discount <=0.2 ~ "Low",
+                   Discount >=0.2 & Discount <=0.5 ~ "Medium",
+                   Discount >=0.5 & Discount <=1 ~ "High",
+                   TRUE ~ "Unknown" #In case of any other values outside the range
+                 ))
+head(df)
+```
+
+-   Sort the dataframe by `Sales` in descending order.
+```{r}
+df_sorted <- df %>%
+  arrange(desc(Sales))
+head(df_sorted)
+```
+
